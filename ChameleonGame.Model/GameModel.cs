@@ -10,15 +10,18 @@ namespace ChameleonGame.Model
 
     public class GameModel
     {
-        #region public properties
-        public ChameleonBoard? Board { get; private set; }
-        public IChameleonDataAccess? DataAccess { get; set; }
-        public Player CurrentPlayer { get; private set; }
-        public Player? Winner { get; private set; } = null;
-        #endregion
-
+        #region private fields
+        public IChameleonDataAccess? _dataAccess = null;
+        private ChameleonBoard? _board = null;
         private bool isGameOver = false;
         private (int r, int c)? _selectedCell = null;
+        #endregion
+
+        #region public properties
+        public Player CurrentPlayer { get; private set; }
+        public Player? Winner { get; private set; } = null;
+        public IChameleonDataAccess? DataAccess { get; set; }
+        #endregion
 
         #region events
         public event EventHandler? BoardChanged;
@@ -30,8 +33,8 @@ namespace ChameleonGame.Model
         #region public methods
         public void NewGame(int size)
         {
-            Board = new ChameleonBoard(size);
-            Board.InitializePieces();
+            _board = new ChameleonBoard(size);
+            _board.InitializePieces();
             CurrentPlayer = Player.Red;
 
             OnBoardChange();
@@ -40,7 +43,7 @@ namespace ChameleonGame.Model
 
         public void LoadGame(string path)
         {
-            ChameleonBoardDTO loaded = DataAccess!.LoadGame(path, out PlayerDTO currentPlayer);
+            ChameleonBoardDTO loaded = _dataAccess!.LoadGame(path, out PlayerDTO currentPlayer);
 
             List<Piece> loadedPieces = new();
             foreach (PieceDTO pieceDTO in loaded.Pieces)
@@ -50,7 +53,7 @@ namespace ChameleonGame.Model
                 loadedPieces.Add(piece);
             }
 
-            Board = new ChameleonBoard(loaded.Size, loadedPieces);
+            _board = new ChameleonBoard(loaded.Size, loadedPieces);
 
             CurrentPlayer = currentPlayer == PlayerDTO.Red ? Player.Red : Player.Green;
 
@@ -61,11 +64,11 @@ namespace ChameleonGame.Model
         public void SaveGame(string path)
         {
             List<PieceDTO> piecesDTO = new();
-            for (int r = 0; r < Board!.Size; r++)
+            for (int r = 0; r < _board!.Size; r++)
             {
-                for (int c = 0; c < Board.Size; c++)
+                for (int c = 0; c < _board.Size; c++)
                 {
-                    Cell cell = Board[r, c];
+                    Cell cell = _board[r, c];
                     if (cell.Piece != null)
                     {
                         PlayerDTO ownerDTO = cell.Piece.Owner == Player.Red ? PlayerDTO.Red : PlayerDTO.Green;
@@ -83,18 +86,18 @@ namespace ChameleonGame.Model
 
             ChameleonBoardDTO boardDTO = new()
             {
-                Size = Board!.Size,
+                Size = _board!.Size,
                 Pieces = piecesDTO
             };
 
             PlayerDTO currentPlayerDTO = CurrentPlayer == Player.Red ? PlayerDTO.Red : PlayerDTO.Green;
 
-            DataAccess!.SaveGame(path, boardDTO, currentPlayerDTO);
+            _dataAccess!.SaveGame(path, boardDTO, currentPlayerDTO);
         }
 
         public void EndTurn()
         {
-            Board!.PerformColorChange();
+            _board!.PerformColorChange();
             CurrentPlayer = CurrentPlayer == Player.Red ? Player.Green : Player.Red;
 
             isGameOver = IsGameOver();
@@ -104,8 +107,8 @@ namespace ChameleonGame.Model
 
         public bool IsGameOver()
         {
-            bool redHasPieces = Board!.PlayerHasPieces(Player.Red);
-            bool greenHasPieces = Board!.PlayerHasPieces(Player.Green);
+            bool redHasPieces = _board!.PlayerHasPieces(Player.Red);
+            bool greenHasPieces = _board!.PlayerHasPieces(Player.Green);
 
             if (redHasPieces && !greenHasPieces && !isGameOver)
             {
@@ -125,34 +128,12 @@ namespace ChameleonGame.Model
 
             return false;
         }
-        #endregion
 
-        #region event invokers
-        private void OnBoardChange()
-        {
-            BoardChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void OnCurrentPlayerChanged()
-        {
-            CurrentPlayerChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void OnGameOver(Player? winner)
-        {
-            GameOver?.Invoke(this, winner);
-        }
-
-        private void OnErrorOccurred(string message)
-        {
-            ErrorOccurred?.Invoke(this, message);
-        }
-
-        public void OnCellClicked(int r, int c)
+        public void CellClicked(int r, int c)
         {
             if (_selectedCell == null)
             {
-                Cell cell = Board![r, c];
+                Cell cell = _board![r, c];
                 if (cell.Piece == null)
                 {
                     OnErrorOccurred("Please select a cell that contains your piece.");
@@ -175,14 +156,14 @@ namespace ChameleonGame.Model
             }
             else
             {
-                Cell from = Board![_selectedCell.Value.r, _selectedCell.Value.c];
-                Cell to = Board![r, c];
+                Cell from = _board![_selectedCell.Value.r, _selectedCell.Value.c];
+                Cell to = _board![r, c];
                 try
                 {
-                    bool moved = Board!.TryMovePiece(from, to, CurrentPlayer);
+                    bool moved = _board!.TryMovePiece(from, to, CurrentPlayer);
                     if (!moved)
                     {
-                        bool jumped = Board!.TryJump(from, to, CurrentPlayer);
+                        bool jumped = _board!.TryJump(from, to, CurrentPlayer);
                         if (!jumped)
                         {
                             OnErrorOccurred("Invalid move or jump!");
@@ -200,6 +181,28 @@ namespace ChameleonGame.Model
                     return;
                 }
             }
+        }
+        #endregion
+
+        #region event invokers
+        private void OnBoardChange()
+        {
+            BoardChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void OnCurrentPlayerChanged()
+        {
+            CurrentPlayerChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void OnGameOver(Player? winner)
+        {
+            GameOver?.Invoke(this, winner);
+        }
+
+        private void OnErrorOccurred(string message)
+        {
+            ErrorOccurred?.Invoke(this, message);
         }
         #endregion
     }
