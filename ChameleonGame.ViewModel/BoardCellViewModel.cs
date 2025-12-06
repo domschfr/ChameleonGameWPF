@@ -9,44 +9,55 @@ namespace ChameleonGame.ViewModel
 {
     public class BoardCellViewModel : ViewModelBase
     {
-        private string _cellImagePath;
-        private string? _pieceImagePath;
+        private string _cellImagePath = "";
+        private string? _pieceImagePath = null;
 
         public int Row { get; }
         public int Col { get; }
 
-        public string CellColorBrush
+        public string CellImagePath
         {
             get => _cellImagePath;
             set
             {
                 if (_cellImagePath != value)
                 {
-                    _cellImagePath = value;
+                    _cellImagePath = TransformCellPath(value);
                     OnPropertyChanged();
                 }
             }
         }
 
-        public string? PieceColorBrush
+        public string? PieceImagePath
         {
             get => _pieceImagePath;
             set
             {
                 if (_pieceImagePath != value)
                 {
-                    _pieceImagePath = value;
+                    _pieceImagePath = TransformPiecePath(value);
                     OnPropertyChanged();
                 }
             }
         }
 
-        public BoardCellViewModel(int row, int col, string cellImagePath, string? pieceImagePath)
+        public DelegateCommand CellClickCommand { get; set; }
+
+        public BoardCellViewModel(int row, int col, DelegateCommand cellClickCommand)
         {
             Row = row;
             Col = col;
-            _cellImagePath = cellImagePath;
-            _pieceImagePath = pieceImagePath;
+            CellClickCommand = cellClickCommand;
+        }
+
+        private string TransformCellPath(string color)
+        {
+            return $"cell_{color}";
+        }
+
+        private string? TransformPiecePath(string? color)
+        {
+            return color != null ? $"chameleon_{color}" : null;
         }
     }
 }

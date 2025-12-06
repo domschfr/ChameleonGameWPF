@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ChameleonGame.Model;
-using ChameleonGame.Persistance;
 
 namespace ChameleonGame.ViewModel
 {
@@ -14,6 +13,8 @@ namespace ChameleonGame.ViewModel
         #region private fields
 
         private readonly GameModel _model;
+        private readonly IFileService _fileService;
+        private readonly IMessageService _messageService;
         private bool _isGameOver = false;
         private string _currentPlayer = string.Empty;
         private int _boardSize;
@@ -55,38 +56,118 @@ namespace ChameleonGame.ViewModel
 
         #region Events
 
-        public event EventHandler? NewGameClicked;
-        public event EventHandler? SaveGameClicked;
-        public event EventHandler? LoadGameClicked;
+        public event EventHandler<int>? NewGame;
+        public event EventHandler<string>? SaveGame;
+        public event EventHandler<string>? LoadGame;
+        public event EventHandler<(int r, int c)>? CellClicked;
 
         #endregion
 
-        public MainViewModel()
+        public MainViewModel(GameModel model, IFileService fileService, IMessageService messageService)
         {
-            _model = new GameModel();
-            _model.DataAccess = new ChameleonTxtDataAccess();
+            _model = model;
+            _fileService = fileService;
+            _messageService = messageService;
 
-            _model.BoardChanged += OnBoardChanged;
-            _model.CurrentPlayerChanged += OnCurrentPlayerChanged;
+            _model.BoardChanged += RenderBoard;
+            _model.CurrentPlayerChanged += CurrentPlayerChanged;
             _model.GameOver += OnGameOver;
             _model.ErrorOccurred += OnErrorOccurred;
 
-            NewGameCommand = new DelegateCommand(_ => );
-            SaveGameCommand = new DelegateCommand(_ => SaveGame?.Invoke(this, EventArgs.Empty), _ => !_isGameOver);
-            LoadGameCommand = new DelegateCommand(_ => LoadGame?.Invoke(this, EventArgs.Empty), _ => !_isGameOver);
-            CellClickedCommand = new DelegateCommand(_ => OnCellClicked, _ => !_isGameOver);
+            NewGameCommand = new DelegateCommand(param => {
+                if (param is int size)
+                    NewGame?.Invoke(this, size);
+            });
+            SaveGameCommand = new DelegateCommand(param => {
+                if (param is string)    
+                    SaveGame?.Invoke(this, (string)param);
+            }, _ => !_isGameOver);
+            LoadGameCommand = new DelegateCommand(param => {
+                if (param is string)
+                    LoadGame?.Invoke(this, (string)param);
+            }, _ => !_isGameOver);
+            CellClickedCommand = new DelegateCommand(param => { 
+                if (param is (int r, int c))
+                    CellClicked?.Invoke(this, (r, c));
+            }, _ => !_isGameOver);
 
+            NewGame += OnNewGame;
+            SaveGame += OnSaveGame;
+            LoadGame += OnLoadGame;
+            CellClicked += OnCellClicked;
         }
 
-        #region Event invokers
+        #region Event handlers
 
-        private void OnNewGame()
+        private void GenerateBoard()
         {
-            NewGameClicked?.Invoke(this, EventArgs.Empty);
+            BoardCells.Clear();
+            for (int r = 0; r < BoardSize; r++)
+            {
+                for (int c = 0; c < BoardSize; c++)
+                {
+                    BoardCells.Add(new BoardCellViewModel(r, c, CellClickedCommand));
+                }
+            }
         }
 
-        private void 
+        private void RenderBoard(object? sender, ChameleonBoard board)
+        {
+            if (_model == null)
+                return;
 
-        
+            foreach (var cellVM in BoardCells) { 
+                Cell cell = board.Board[cellVM.Row, cellVM.Col];
+                cellVM.CellImagePath = cell.Color.ToString();
+                cellVM.PieceImagePath = cell.Piece?.Owner.ToString() ?? null;
+            }
+        }
+
+        private void CurrentPlayerChanged(object? sender, Player player)
+        {
+            CurrentPlayer = player.ToString();
+        }
+
+        private void OnGameOver(object? sender, Player? e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void OnErrorOccurred(object? sender, string e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void OnNewGame(object? sender, int e)
+        {
+            try
+            {
+                GenerateBoard();
+                _model.NewGame(e);
+                BoardSize = e;
+            }
+            catch (Exception ex)
+            {
+
+                OnErrorOccurred(sender, ex.Message);
+            }
+
+        }
+
+        private void OnSaveGame(object? sender, string e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void OnLoadGame(object? sender, string e)
+        {
+            throw new NotImplementedException();
+        }
+        private void OnCellClicked(object? sender, (int r, int c) e)
+        {
+            _model.CellClicked(e.r, e.c);
+        }
+
+        #endregion
     }
 }
