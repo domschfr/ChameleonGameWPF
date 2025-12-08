@@ -26,7 +26,7 @@ namespace ChameleonGame.Model
         #region events
         public event EventHandler<ChameleonBoard>? BoardChanged;
         public event EventHandler<Player>? CurrentPlayerChanged;
-        public event EventHandler<Player?>? GameOver;
+        public event EventHandler<Player>? GameOver;
         public event EventHandler<string>? ErrorOccurred;
         #endregion
 
@@ -200,7 +200,7 @@ namespace ChameleonGame.Model
             CurrentPlayerChanged?.Invoke(this, _currentPlayer);
         }
 
-        private void OnGameOver(Player? winner)
+        private void OnGameOver(Player winner)
         {
             GameOver?.Invoke(this, winner);
         }

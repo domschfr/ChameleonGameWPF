@@ -55,16 +55,18 @@ namespace ChameleonGame.ViewModel
 
         #region Events
 
-        public event EventHandler<int>? NewGame;
+        public event EventHandler? NewGame;
         public event EventHandler<string>? SaveGame;
         public event EventHandler<string>? LoadGame;
-        public event EventHandler<(int r, int c)>? CellClicked;
+        public event EventHandler<Player>? GameOver;
+        public event EventHandler<string>? ErrorOccurred;
 
         #endregion
 
         public MainViewModel(GameModel model)
         {
             _model = model;
+            BoardCells = new ObservableCollection<BoardCellViewModel>();
 
             _model.BoardChanged += RenderBoard;
             _model.CurrentPlayerChanged += CurrentPlayerChanged;
@@ -74,18 +76,13 @@ namespace ChameleonGame.ViewModel
             NewGameCommand = new DelegateCommand(param => {
                 if (param is int size)
                 {
-                    try
-                    {
-                        GenerateBoard();
-                        _model.NewGame(size);
-                        BoardSize = size;
-                    }
-                    catch (Exception ex)
-                    {
-
-                        throw new NotImplementedException();
-                    }
+                    NewGameRequested(size);
                 }
+                else 
+                {
+                    NewGame?.Invoke(this, EventArgs.Empty);
+                }
+
                     
             });
             SaveGameCommand = new DelegateCommand(param => {
@@ -94,16 +91,35 @@ namespace ChameleonGame.ViewModel
             }, _ => !_isGameOver);
             LoadGameCommand = new DelegateCommand(param => {
                 if (param is string)
+                {
                     _model.LoadGame((string)param);
-            }, _ => !_isGameOver);
+                    _isGameOver = false;
+                }
+            });
             CellClickedCommand = new DelegateCommand(param => { 
-                if (param is (int r, int c))
-                    _model.CellClicked(r, c);
+                if (param is BoardCellViewModel cell)
+                    _model.CellClicked(cell.Row, cell.Col);
             }, _ => !_isGameOver);
 
         }
 
-        #region Event handlers
+        #region Private methods
+
+        private void NewGameRequested(int size)
+        {
+            try
+            {
+                BoardSize = size;
+                GenerateBoard();
+                _model.NewGame(size);
+                _isGameOver = false;
+                RefreshCommands();
+            }
+            catch (Exception ex)
+            {
+                OnErrorOccurred(this, ex.Message);
+            }
+        }
 
         private void GenerateBoard()
         {
@@ -116,6 +132,16 @@ namespace ChameleonGame.ViewModel
                 }
             }
         }
+
+        private void RefreshCommands()
+        {
+            SaveGameCommand.RaiseCanExecuteChanged();
+            CellClickedCommand.RaiseCanExecuteChanged();
+        }
+
+        #endregion
+
+        #region Event handlers
 
         private void RenderBoard(object? sender, ChameleonBoard board)
         {
@@ -131,17 +157,19 @@ namespace ChameleonGame.ViewModel
 
         private void CurrentPlayerChanged(object? sender, Player player)
         {
-            CurrentPlayer = player.ToString();
+            CurrentPlayer = player == Player.Red ? "Red" : "Green";
         }
 
-        private void OnGameOver(object? sender, Player? e)
+        private void OnGameOver(object? sender, Player e)
         {
-            throw new NotImplementedException();
+            _isGameOver = true;
+            RefreshCommands();
+            GameOver?.Invoke(this, e);
         }
 
         private void OnErrorOccurred(object? sender, string e)
         {
-            throw new NotImplementedException();
+            ErrorOccurred?.Invoke(this, e);
         }
 
         #endregion

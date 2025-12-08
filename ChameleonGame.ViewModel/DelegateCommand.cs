@@ -16,7 +16,7 @@ namespace ChameleonGame.ViewModel
 
         public DelegateCommand(Action<object?> execute, Predicate<object?>? canExecute = null)
         {
-            if (_execute == null)
+            if (execute == null)
             {
                 throw new ArgumentNullException(nameof(execute));
             }

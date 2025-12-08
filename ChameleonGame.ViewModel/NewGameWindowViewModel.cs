@@ -8,10 +8,10 @@ namespace ChameleonGame.ViewModel
 {
     public class NewGameWindowViewModel : ViewModelBase
     {
-        private int _selectedSize;
-        private bool? _dialogResult;
+        private int? _selectedSize = null;
+        private bool _dialogResult = false;
 
-        public int SelectedSize
+        public int? SelectedSize
         {
             get => _selectedSize;
             set
@@ -20,11 +20,15 @@ namespace ChameleonGame.ViewModel
                 {
                     _selectedSize = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(IsEasy));
+                    OnPropertyChanged(nameof(IsMedium));
+                    OnPropertyChanged(nameof(IsHard));
+                    ConfirmCommand.RaiseCanExecuteChanged();
                 }
             }
         }
 
-        public bool? DialogResult
+        public bool DialogResult
         {
             get => _dialogResult;
             set
@@ -35,6 +39,24 @@ namespace ChameleonGame.ViewModel
                     OnPropertyChanged();
                 }
             }
+        }
+
+        public bool IsEasy
+        {
+            get => SelectedSize == 3;
+            set { if (value) SelectedSize = 3; }
+        }
+
+        public bool IsMedium
+        {
+            get => SelectedSize == 5;
+            set { if (value) SelectedSize = 5; }
+        }
+        
+        public bool IsHard
+        {
+            get => SelectedSize == 7;
+            set { if (value) SelectedSize = 7; }
         }
 
         public DelegateCommand ConfirmCommand { get; }
@@ -48,7 +70,7 @@ namespace ChameleonGame.ViewModel
             }, _ => SelectedSize == 3 || SelectedSize == 5 || SelectedSize == 7);
             CancelCommand = new DelegateCommand(_ =>
             {
-                DialogResult = false;
+                DialogResult = true;
             });
         }
     }

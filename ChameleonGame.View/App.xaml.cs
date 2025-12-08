@@ -34,6 +34,8 @@ namespace ChameleonGame.View
             _mainViewModel.NewGame += ViewModel_NewGame;
             _mainViewModel.SaveGame += ViewModel_SaveGame;
             _mainViewModel.LoadGame += ViewModel_LoadGame;
+            _mainViewModel.GameOver += ViewModel_GameOver;
+            _mainViewModel.ErrorOccurred += ViewModel_ErrorOccurred;
 
 
             _mainWindow = new MainWindow
@@ -43,13 +45,13 @@ namespace ChameleonGame.View
             _mainWindow.Show();
         }
 
-        private void ViewModel_NewGame(object? sender, int e)
+        private void ViewModel_NewGame(object? sender, EventArgs e)
         {
             NewGameWindow window = new NewGameWindow();
             NewGameWindowViewModel viewModel = new NewGameWindowViewModel();
             window.DataContext = viewModel;
 
-            if (window.ShowDialog() == true)
+            if (window.ShowDialog() == true && viewModel.SelectedSize != null)
             {
                 _mainViewModel.NewGameCommand.Execute(viewModel.SelectedSize);
             }
@@ -71,7 +73,7 @@ namespace ChameleonGame.View
                 catch (Exception ex)
                 {
 
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ViewModel_ErrorOccurred(this, ex.Message);
                 }
             }
         }
@@ -91,15 +93,20 @@ namespace ChameleonGame.View
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ViewModel_ErrorOccurred(this, ex.Message);
                 }
             }
         }
 
-        private void Model_GameOver(object? sender, Player e)
+        private void ViewModel_GameOver(object? sender, Player e)
         {
             string winner = e == Player.Red ? "Red" : "Green";
             MessageBox.Show($"{winner} player wins!", "Game Over", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void ViewModel_ErrorOccurred(object? sender, string e)
+        {
+            MessageBox.Show(e, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

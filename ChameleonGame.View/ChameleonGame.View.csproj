@@ -9,6 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\cell_gray.png" />
+    <None Remove="Images\cell_green.png" />
+    <None Remove="Images\cell_red.png" />
+    <None Remove="Images\chameleon_banner.png" />
+    <None Remove="Images\chameleon_green.png" />
+    <None Remove="Images\chameleon_logo.ico" />
+    <None Remove="Images\chameleon_red.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="ELTE.FI.SARuleSet" Version="3.2.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -17,6 +27,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ChameleonGame.ViewModel\ChameleonGame.ViewModel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\cell_gray.png" />
+    <Resource Include="Images\cell_green.png" />
+    <Resource Include="Images\cell_red.png" />
+    <Resource Include="Images\chameleon_banner.png" />
+    <Resource Include="Images\chameleon_green.png" />
+    <Resource Include="Images\chameleon_logo.ico" />
+    <Resource Include="Images\chameleon_red.png" />
   </ItemGroup>
 
 </Project>
