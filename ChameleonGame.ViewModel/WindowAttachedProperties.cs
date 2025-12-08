@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace ChameleonGame.ViewModel
 {
-    public interface IMessageService
+    public static class WindowAttachedProperties
     {
-        void ShowMessage(string message, string caption);
-        void ShowError(string message, string caption);
+        public static readonly DependencyProperty 
     }
 }

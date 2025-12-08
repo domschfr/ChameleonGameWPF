@@ -5,8 +5,36 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ChameleonGame.View"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Chameleon Game" Height="737" Width="627">
     <Grid>
 
+        <DockPanel>
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="New Game" Command="{Binding NewGameCommand}" CommandParameter="{Binding BoardSize}"/>
+                <MenuItem Header="Save Game" Command="{Binding SaveGameCommand}" CommandParameter="save"/>
+                <MenuItem Header="Load Game" Command="{Binding LoadGameCommand}" CommandParameter="load"/>
+            </Menu>
+
+            <StatusBar DockPanel.Dock="Bottom">
+                <StatusBarItem>
+                    <TextBlock Text="{Binding CurrentPlayer, StringFormat='Turn: {0}'}" FontWeight="Bold"/>
+                </StatusBarItem>
+            </StatusBar>
+        </DockPanel>
+
+        <Viewbox Margin="10">
+            <ItemsControl ItemsSource="{Binding BoardCells}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="{Binding BoardSize}" Columns="{Binding BoardSize}"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Width="90" Height="90" Style="{StaticResource CellButtonStyle}" Command="{Binding DataContext.CellClickCommand}" CommandParameter="{Binding Converter={StaticResource CellToTupleConverter}}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Viewbox>
     </Grid>
 </Window>

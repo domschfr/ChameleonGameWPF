@@ -1,10 +1,11 @@
-﻿using System;
+﻿using ChameleonGame.Model;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using ChameleonGame.Model;
 
 namespace ChameleonGame.ViewModel
 {
@@ -13,10 +14,8 @@ namespace ChameleonGame.ViewModel
         #region private fields
 
         private readonly GameModel _model;
-        private readonly IFileService _fileService;
-        private readonly IMessageService _messageService;
         private bool _isGameOver = false;
-        private string _currentPlayer = string.Empty;
+        private string _currentPlayer = "";
         private int _boardSize;
 
         #endregion
@@ -63,11 +62,9 @@ namespace ChameleonGame.ViewModel
 
         #endregion
 
-        public MainViewModel(GameModel model, IFileService fileService, IMessageService messageService)
+        public MainViewModel(GameModel model)
         {
             _model = model;
-            _fileService = fileService;
-            _messageService = messageService;
 
             _model.BoardChanged += RenderBoard;
             _model.CurrentPlayerChanged += CurrentPlayerChanged;
@@ -76,25 +73,34 @@ namespace ChameleonGame.ViewModel
 
             NewGameCommand = new DelegateCommand(param => {
                 if (param is int size)
-                    NewGame?.Invoke(this, size);
+                {
+                    try
+                    {
+                        GenerateBoard();
+                        _model.NewGame(size);
+                        BoardSize = size;
+                    }
+                    catch (Exception ex)
+                    {
+
+                        throw new NotImplementedException();
+                    }
+                }
+                    
             });
             SaveGameCommand = new DelegateCommand(param => {
-                if (param is string)    
-                    SaveGame?.Invoke(this, (string)param);
+                if (param is string)
+                    _model.SaveGame((string)param);
             }, _ => !_isGameOver);
             LoadGameCommand = new DelegateCommand(param => {
                 if (param is string)
-                    LoadGame?.Invoke(this, (string)param);
+                    _model.LoadGame((string)param);
             }, _ => !_isGameOver);
             CellClickedCommand = new DelegateCommand(param => { 
                 if (param is (int r, int c))
-                    CellClicked?.Invoke(this, (r, c));
+                    _model.CellClicked(r, c);
             }, _ => !_isGameOver);
 
-            NewGame += OnNewGame;
-            SaveGame += OnSaveGame;
-            LoadGame += OnLoadGame;
-            CellClicked += OnCellClicked;
         }
 
         #region Event handlers
@@ -118,8 +124,8 @@ namespace ChameleonGame.ViewModel
 
             foreach (var cellVM in BoardCells) { 
                 Cell cell = board.Board[cellVM.Row, cellVM.Col];
-                cellVM.CellImagePath = cell.Color.ToString();
-                cellVM.PieceImagePath = cell.Piece?.Owner.ToString() ?? null;
+                cellVM.CellImageFilename = cell.Color.ToString();
+                cellVM.PieceImageFilename = cell.Piece?.Owner.ToString() ?? null;
             }
         }
 
@@ -136,36 +142,6 @@ namespace ChameleonGame.ViewModel
         private void OnErrorOccurred(object? sender, string e)
         {
             throw new NotImplementedException();
-        }
-
-        private void OnNewGame(object? sender, int e)
-        {
-            try
-            {
-                GenerateBoard();
-                _model.NewGame(e);
-                BoardSize = e;
-            }
-            catch (Exception ex)
-            {
-
-                OnErrorOccurred(sender, ex.Message);
-            }
-
-        }
-
-        private void OnSaveGame(object? sender, string e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void OnLoadGame(object? sender, string e)
-        {
-            throw new NotImplementedException();
-        }
-        private void OnCellClicked(object? sender, (int r, int c) e)
-        {
-            _model.CellClicked(e.r, e.c);
         }
 
         #endregion

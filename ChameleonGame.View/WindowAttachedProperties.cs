@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace ChameleonGame.ViewModel
 {
-    public interface IFileService
+    public static class WindowAttachedProperties
     {
-        string GetSavePath(string filename);
-        string GetLoadPath(string filename);
+        public static readonly DependencyProperty 
     }
 }
