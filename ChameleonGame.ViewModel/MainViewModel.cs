@@ -90,7 +90,7 @@ namespace ChameleonGame.ViewModel
                 if (BoardCells.Count != 0)
                 {
                     string? path = param as string;
-                    if (string.IsNullOrEmpty(path) || path == "load")
+                    if (string.IsNullOrEmpty(path))
                     {
                         SaveGame?.Invoke(this, EventArgs.Empty);
                     }
@@ -110,7 +110,7 @@ namespace ChameleonGame.ViewModel
             }, _ => !_isGameOver);
             LoadGameCommand = new DelegateCommand(param => {
                 string? path = param as string;
-                if (string.IsNullOrEmpty(path) || path == "save")
+                if (string.IsNullOrEmpty(path))
                 {
                     LoadGame?.Invoke(this, EventArgs.Empty);
                     return;
@@ -186,6 +186,15 @@ namespace ChameleonGame.ViewModel
                 Cell cell = board.Board[cellVM.Row, cellVM.Col];
                 cellVM.CellImageFilename = cell.Color.ToString();
                 cellVM.PieceImageFilename = cell.Piece?.Owner.ToString() ?? null;
+
+                if (_model.SelectedCell.HasValue)
+                {
+                    cellVM.IsSelected = _model.SelectedCell.Value.r == cellVM.Row && _model.SelectedCell.Value.c == cellVM.Col;
+                }
+                else
+                {
+                     cellVM.IsSelected = false;
+                }
             }
         }
 

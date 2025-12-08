@@ -9,11 +9,25 @@ namespace ChameleonGame.ViewModel
 {
     public class BoardCellViewModel : ViewModelBase
     {
+        private bool _isSelected = false;
         private string _cellImageFilename = "cell_gray.png";
         private string? _pieceImageFilename = null;
 
         public int Row { get; }
         public int Col { get; }
+
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                if (_isSelected != value)
+                {
+                    _isSelected = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public string CellImageFilename
         {

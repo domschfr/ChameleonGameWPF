@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChameleonGame.ViewModel", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChameleonGame.View", "ChameleonGame.View\ChameleonGame.View.csproj", "{C23B1CEE-6001-4CDC-A4BA-878964BE2AC6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChameleonGame.Test", "ChameleonGameTest\ChameleonGame.Test.csproj", "{BC32EB0B-89B4-4DD1-7261-B8BDF5915C7C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{C23B1CEE-6001-4CDC-A4BA-878964BE2AC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C23B1CEE-6001-4CDC-A4BA-878964BE2AC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C23B1CEE-6001-4CDC-A4BA-878964BE2AC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC32EB0B-89B4-4DD1-7261-B8BDF5915C7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC32EB0B-89B4-4DD1-7261-B8BDF5915C7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC32EB0B-89B4-4DD1-7261-B8BDF5915C7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC32EB0B-89B4-4DD1-7261-B8BDF5915C7C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

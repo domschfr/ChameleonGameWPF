@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:ChameleonGame.View"
         mc:Ignorable="d"
         Title="Chameleon Game" Height="737" Width="627"
-        WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
+        Icon="/Images/chameleon_logo.ico">
 
     <Window.Resources>
         <local:ImageSourceConverter x:Key="ImageSourceConverter"/>
@@ -21,7 +22,15 @@
                         <Grid>
                             <Image Source="{Binding CellImageFilename, Converter={StaticResource ImageSourceConverter}}" Stretch="Fill"  Width="90" Height="90"/>
                             <Image Source="{Binding PieceImageFilename, Converter={StaticResource ImageSourceConverter}}" Stretch="Fill" Width="80" Height="80"/>
+
+                            <Border x:Name="SelectionBorder" BorderBrush="Gold" BorderThickness="4" Visibility="Hidden"/>
                         </Grid>
+
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="SelectionBorder" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -33,8 +42,8 @@
         <DockPanel>
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="New Game" Command="{Binding NewGameCommand}"/>
-                <MenuItem Header="Save Game" Command="{Binding SaveGameCommand}" CommandParameter="save"/>
-                <MenuItem Header="Load Game" Command="{Binding LoadGameCommand}" CommandParameter="load"/>
+                <MenuItem Header="Save Game" Command="{Binding SaveGameCommand}"/>
+                <MenuItem Header="Load Game" Command="{Binding LoadGameCommand}"/>
             </Menu>
 
             <Image DockPanel.Dock="Top" Source="/Images/chameleon_banner.png" Height="50" Stretch="Uniform" HorizontalAlignment="Center"/>

@@ -21,6 +21,7 @@ namespace ChameleonGame.Model
         #region public properties
         public Player? Winner { get; private set; } = null;
         public IChameleonDataAccess? DataAccess { get; set; }
+        public (int r, int c)? SelectedCell { get => _selectedCell; }
         #endregion
 
         #region events
