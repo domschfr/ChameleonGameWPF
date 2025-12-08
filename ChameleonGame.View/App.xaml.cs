@@ -57,12 +57,14 @@ namespace ChameleonGame.View
             }
         }
 
-        private void ViewModel_SaveGame(object? sender, string e)
+        private void ViewModel_SaveGame(object? sender, EventArgs e)
         {
-            OpenFileDialog saveFileDialog = new OpenFileDialog
+            SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Title = "Save Game",
-                Filter = "Chameleon Game (*.txt)|*.txt|All Files (*.*)|*.*"
+                Filter = "Chameleon Game (*.txt)|*.txt|All Files (*.*)|*.*",
+                DefaultExt = "txt",
+                AddExtension = true
             };
             if (saveFileDialog.ShowDialog() == true)
             {
@@ -78,7 +80,7 @@ namespace ChameleonGame.View
             }
         }
 
-        private void ViewModel_LoadGame(object? sender, string e)
+        private void ViewModel_LoadGame(object? sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {

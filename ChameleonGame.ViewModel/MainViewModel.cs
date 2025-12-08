@@ -56,8 +56,8 @@ namespace ChameleonGame.ViewModel
         #region Events
 
         public event EventHandler? NewGame;
-        public event EventHandler<string>? SaveGame;
-        public event EventHandler<string>? LoadGame;
+        public event EventHandler? SaveGame;
+        public event EventHandler? LoadGame;
         public event EventHandler<Player>? GameOver;
         public event EventHandler<string>? ErrorOccurred;
 
@@ -86,14 +86,48 @@ namespace ChameleonGame.ViewModel
                     
             });
             SaveGameCommand = new DelegateCommand(param => {
-                if (param is string)
-                    _model.SaveGame((string)param);
+                
+                if (BoardCells.Count != 0)
+                {
+                    string? path = param as string;
+                    if (string.IsNullOrEmpty(path) || path == "load")
+                    {
+                        SaveGame?.Invoke(this, EventArgs.Empty);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            _model.SaveGame(path);
+                        }
+                        catch (Exception ex)
+                        {
+                            OnErrorOccurred(this, ex.Message);
+                        }
+                    }
+                }
+                    
             }, _ => !_isGameOver);
             LoadGameCommand = new DelegateCommand(param => {
-                if (param is string)
+                string? path = param as string;
+                if (string.IsNullOrEmpty(path) || path == "save")
                 {
-                    _model.LoadGame((string)param);
-                    _isGameOver = false;
+                    LoadGame?.Invoke(this, EventArgs.Empty);
+                    return;
+                }
+                else
+                {
+                    try
+                    {
+                        _model.LoadGame(path);
+                        _isGameOver = false;
+                        RefreshCommands();
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        OnErrorOccurred(this, ex.Message);
+                    }
                 }
             });
             CellClickedCommand = new DelegateCommand(param => { 
