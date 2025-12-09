@@ -5,8 +5,69 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ChameleonGame.View"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Chameleon Game" Height="737" Width="627"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
+        Icon="/Images/chameleon_logo.ico">
+
+    <Window.Resources>
+        <local:ImageSourceConverter x:Key="ImageSourceConverter"/>
+
+        <Style x:Key="CellButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Image Source="{Binding CellImageFilename, Converter={StaticResource ImageSourceConverter}}" Stretch="Fill"  Width="90" Height="90"/>
+                            <Image Source="{Binding PieceImageFilename, Converter={StaticResource ImageSourceConverter}}" Stretch="Fill" Width="80" Height="80"/>
+
+                            <Border x:Name="SelectionBorder" BorderBrush="Gold" BorderThickness="4" Visibility="Hidden"/>
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="SelectionBorder" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    
     <Grid>
 
+        <DockPanel>
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="New Game" Command="{Binding NewGameCommand}"/>
+                <MenuItem Header="Save Game" Command="{Binding SaveGameCommand}"/>
+                <MenuItem Header="Load Game" Command="{Binding LoadGameCommand}"/>
+            </Menu>
+
+            <Image DockPanel.Dock="Top" Source="/Images/chameleon_banner.png" Height="50" Stretch="Uniform" HorizontalAlignment="Center"/>
+
+            <StatusBar DockPanel.Dock="Top">
+                <StatusBarItem>
+                    <TextBlock Text="{Binding CurrentPlayer, StringFormat='Turn: {0}'}" FontWeight="Bold" FontSize="20" TextAlignment="Center" HorizontalAlignment="Center"/>
+                </StatusBarItem>
+            </StatusBar>
+        
+            <Viewbox Margin="10">
+                <ItemsControl ItemsSource="{Binding BoardCells}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="{Binding BoardSize}" Columns="{Binding BoardSize}"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Width="90" Height="90" Style="{StaticResource CellButtonStyle}" Command="{Binding CellClickCommand}" CommandParameter="{Binding}"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Viewbox>
+        </DockPanel>
     </Grid>
 </Window>

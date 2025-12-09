@@ -9,33 +9,47 @@ namespace ChameleonGame.ViewModel
 {
     public class BoardCellViewModel : ViewModelBase
     {
-        private string _cellImagePath = "";
-        private string? _pieceImagePath = null;
+        private bool _isSelected = false;
+        private string _cellImageFilename = "cell_gray.png";
+        private string? _pieceImageFilename = null;
 
         public int Row { get; }
         public int Col { get; }
 
-        public string CellImagePath
+        public bool IsSelected
         {
-            get => _cellImagePath;
+            get => _isSelected;
             set
             {
-                if (_cellImagePath != value)
+                if (_isSelected != value)
                 {
-                    _cellImagePath = TransformCellPath(value);
+                    _isSelected = value;
                     OnPropertyChanged();
                 }
             }
         }
 
-        public string? PieceImagePath
+        public string CellImageFilename
         {
-            get => _pieceImagePath;
+            get => _cellImageFilename;
             set
             {
-                if (_pieceImagePath != value)
+                if (_cellImageFilename != value)
                 {
-                    _pieceImagePath = TransformPiecePath(value);
+                    _cellImageFilename = TransformCellPath(value);
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? PieceImageFilename
+        {
+            get => _pieceImageFilename;
+            set
+            {
+                if (_pieceImageFilename != value)
+                {
+                    _pieceImageFilename = TransformPiecePath(value);
                     OnPropertyChanged();
                 }
             }
@@ -52,12 +66,12 @@ namespace ChameleonGame.ViewModel
 
         private string TransformCellPath(string color)
         {
-            return $"cell_{color}";
+            return $"cell_{color}.png";
         }
 
         private string? TransformPiecePath(string? color)
         {
-            return color != null ? $"chameleon_{color}" : null;
+            return color != null ? $"chameleon_{color}.png" : null;
         }
     }
 }

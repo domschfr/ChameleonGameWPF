@@ -1,10 +1,11 @@
-﻿using System;
+﻿using ChameleonGame.Model;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using ChameleonGame.Model;
 
 namespace ChameleonGame.ViewModel
 {
@@ -13,10 +14,8 @@ namespace ChameleonGame.ViewModel
         #region private fields
 
         private readonly GameModel _model;
-        private readonly IFileService _fileService;
-        private readonly IMessageService _messageService;
         private bool _isGameOver = false;
-        private string _currentPlayer = string.Empty;
+        private string _currentPlayer = "";
         private int _boardSize;
 
         #endregion
@@ -56,18 +55,18 @@ namespace ChameleonGame.ViewModel
 
         #region Events
 
-        public event EventHandler<int>? NewGame;
-        public event EventHandler<string>? SaveGame;
-        public event EventHandler<string>? LoadGame;
-        public event EventHandler<(int r, int c)>? CellClicked;
+        public event EventHandler? NewGame;
+        public event EventHandler? SaveGame;
+        public event EventHandler? LoadGame;
+        public event EventHandler<Player>? GameOver;
+        public event EventHandler<string>? ErrorOccurred;
 
         #endregion
 
-        public MainViewModel(GameModel model, IFileService fileService, IMessageService messageService)
+        public MainViewModel(GameModel model)
         {
             _model = model;
-            _fileService = fileService;
-            _messageService = messageService;
+            BoardCells = new ObservableCollection<BoardCellViewModel>();
 
             _model.BoardChanged += RenderBoard;
             _model.CurrentPlayerChanged += CurrentPlayerChanged;
@@ -76,28 +75,85 @@ namespace ChameleonGame.ViewModel
 
             NewGameCommand = new DelegateCommand(param => {
                 if (param is int size)
-                    NewGame?.Invoke(this, size);
+                {
+                    NewGameRequested(size);
+                }
+                else 
+                {
+                    NewGame?.Invoke(this, EventArgs.Empty);
+                }
+
+                    
             });
             SaveGameCommand = new DelegateCommand(param => {
-                if (param is string)    
-                    SaveGame?.Invoke(this, (string)param);
+                
+                if (BoardCells.Count != 0)
+                {
+                    string? path = param as string;
+                    if (string.IsNullOrEmpty(path))
+                    {
+                        SaveGame?.Invoke(this, EventArgs.Empty);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            _model.SaveGame(path);
+                        }
+                        catch (Exception ex)
+                        {
+                            OnErrorOccurred(this, ex.Message);
+                        }
+                    }
+                }
+                    
             }, _ => !_isGameOver);
             LoadGameCommand = new DelegateCommand(param => {
-                if (param is string)
-                    LoadGame?.Invoke(this, (string)param);
-            }, _ => !_isGameOver);
+                string? path = param as string;
+                if (string.IsNullOrEmpty(path))
+                {
+                    LoadGame?.Invoke(this, EventArgs.Empty);
+                    return;
+                }
+                else
+                {
+                    try
+                    {
+                        _model.LoadGame(path);
+                        _isGameOver = false;
+                        RefreshCommands();
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        OnErrorOccurred(this, ex.Message);
+                    }
+                }
+            });
             CellClickedCommand = new DelegateCommand(param => { 
-                if (param is (int r, int c))
-                    CellClicked?.Invoke(this, (r, c));
+                if (param is BoardCellViewModel cell)
+                    _model.CellClicked(cell.Row, cell.Col);
             }, _ => !_isGameOver);
 
-            NewGame += OnNewGame;
-            SaveGame += OnSaveGame;
-            LoadGame += OnLoadGame;
-            CellClicked += OnCellClicked;
         }
 
-        #region Event handlers
+        #region Private methods
+
+        private void NewGameRequested(int size)
+        {
+            try
+            {
+                BoardSize = size;
+                GenerateBoard();
+                _model.NewGame(size);
+                _isGameOver = false;
+                RefreshCommands();
+            }
+            catch (Exception ex)
+            {
+                OnErrorOccurred(this, ex.Message);
+            }
+        }
 
         private void GenerateBoard()
         {
@@ -111,6 +167,16 @@ namespace ChameleonGame.ViewModel
             }
         }
 
+        private void RefreshCommands()
+        {
+            SaveGameCommand.RaiseCanExecuteChanged();
+            CellClickedCommand.RaiseCanExecuteChanged();
+        }
+
+        #endregion
+
+        #region Event handlers
+
         private void RenderBoard(object? sender, ChameleonBoard board)
         {
             if (_model == null)
@@ -118,54 +184,35 @@ namespace ChameleonGame.ViewModel
 
             foreach (var cellVM in BoardCells) { 
                 Cell cell = board.Board[cellVM.Row, cellVM.Col];
-                cellVM.CellImagePath = cell.Color.ToString();
-                cellVM.PieceImagePath = cell.Piece?.Owner.ToString() ?? null;
+                cellVM.CellImageFilename = cell.Color.ToString();
+                cellVM.PieceImageFilename = cell.Piece?.Owner.ToString() ?? null;
+
+                if (_model.SelectedCell.HasValue)
+                {
+                    cellVM.IsSelected = _model.SelectedCell.Value.r == cellVM.Row && _model.SelectedCell.Value.c == cellVM.Col;
+                }
+                else
+                {
+                     cellVM.IsSelected = false;
+                }
             }
         }
 
         private void CurrentPlayerChanged(object? sender, Player player)
         {
-            CurrentPlayer = player.ToString();
+            CurrentPlayer = player == Player.Red ? "Red" : "Green";
         }
 
-        private void OnGameOver(object? sender, Player? e)
+        private void OnGameOver(object? sender, Player e)
         {
-            throw new NotImplementedException();
+            _isGameOver = true;
+            RefreshCommands();
+            GameOver?.Invoke(this, e);
         }
 
         private void OnErrorOccurred(object? sender, string e)
         {
-            throw new NotImplementedException();
-        }
-
-        private void OnNewGame(object? sender, int e)
-        {
-            try
-            {
-                GenerateBoard();
-                _model.NewGame(e);
-                BoardSize = e;
-            }
-            catch (Exception ex)
-            {
-
-                OnErrorOccurred(sender, ex.Message);
-            }
-
-        }
-
-        private void OnSaveGame(object? sender, string e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void OnLoadGame(object? sender, string e)
-        {
-            throw new NotImplementedException();
-        }
-        private void OnCellClicked(object? sender, (int r, int c) e)
-        {
-            _model.CellClicked(e.r, e.c);
+            ErrorOccurred?.Invoke(this, e);
         }
 
         #endregion

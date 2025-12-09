@@ -21,12 +21,13 @@ namespace ChameleonGame.Model
         #region public properties
         public Player? Winner { get; private set; } = null;
         public IChameleonDataAccess? DataAccess { get; set; }
+        public (int r, int c)? SelectedCell { get => _selectedCell; }
         #endregion
 
         #region events
         public event EventHandler<ChameleonBoard>? BoardChanged;
         public event EventHandler<Player>? CurrentPlayerChanged;
-        public event EventHandler<Player?>? GameOver;
+        public event EventHandler<Player>? GameOver;
         public event EventHandler<string>? ErrorOccurred;
         #endregion
 
@@ -200,7 +201,7 @@ namespace ChameleonGame.Model
             CurrentPlayerChanged?.Invoke(this, _currentPlayer);
         }
 
-        private void OnGameOver(Player? winner)
+        private void OnGameOver(Player winner)
         {
             GameOver?.Invoke(this, winner);
         }
