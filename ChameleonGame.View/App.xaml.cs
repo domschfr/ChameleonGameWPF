@@ -100,10 +100,9 @@ namespace ChameleonGame.View
             }
         }
 
-        private void ViewModel_GameOver(object? sender, Player e)
+        private void ViewModel_GameOver(object? sender, string e)
         {
-            string winner = e == Player.Red ? "Red" : "Green";
-            MessageBox.Show($"{winner} player wins!", "Game Over", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show($"{e} player wins!", "Game Over", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void ViewModel_ErrorOccurred(object? sender, string e)
