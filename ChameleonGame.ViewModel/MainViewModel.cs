@@ -58,7 +58,7 @@ namespace ChameleonGame.ViewModel
         public event EventHandler? NewGame;
         public event EventHandler? SaveGame;
         public event EventHandler? LoadGame;
-        public event EventHandler<Player>? GameOver;
+        public event EventHandler<string>? GameOver;
         public event EventHandler<string>? ErrorOccurred;
 
         #endregion
@@ -207,7 +207,8 @@ namespace ChameleonGame.ViewModel
         {
             _isGameOver = true;
             RefreshCommands();
-            GameOver?.Invoke(this, e);
+            string winnerString = e == Player.Red ? "Red" : "Green";
+            GameOver?.Invoke(this, winnerString);
         }
 
         private void OnErrorOccurred(object? sender, string e)
