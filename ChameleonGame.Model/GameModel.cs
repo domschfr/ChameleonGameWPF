@@ -45,6 +45,9 @@ namespace ChameleonGame.Model
             _board.InitializePieces();
             _currentPlayer = Player.Red;
 
+            isGameOver = false;
+            Winner = null;
+
             OnBoardChange();
             OnCurrentPlayerChanged();
         }
@@ -64,6 +67,9 @@ namespace ChameleonGame.Model
             _board = new ChameleonBoard(loaded.Size, loadedPieces);
 
             _currentPlayer = currentPlayer == PlayerDTO.Red ? Player.Red : Player.Green;
+
+            isGameOver = false;
+            Winner = null;
 
             OnBoardChange();
             OnCurrentPlayerChanged();
@@ -110,7 +116,10 @@ namespace ChameleonGame.Model
 
             isGameOver = IsGameOver();
 
-            OnCurrentPlayerChanged();
+            if (!isGameOver)
+            {
+                OnCurrentPlayerChanged();
+            }
         }
 
         public bool IsGameOver()
@@ -139,6 +148,9 @@ namespace ChameleonGame.Model
 
         public void CellClicked(int r, int c)
         {
+            if (isGameOver)
+                return;
+
             if (_selectedCell == null)
             {
                 Cell cell = _board![r, c];

@@ -50,7 +50,7 @@
 
             <StatusBar DockPanel.Dock="Top">
                 <StatusBarItem>
-                    <TextBlock Text="{Binding CurrentPlayer, StringFormat='Turn: {0}'}" FontWeight="Bold" FontSize="20" TextAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding CurrentPlayer}" FontWeight="Bold" FontSize="20" TextAlignment="Center" HorizontalAlignment="Center"/>
                 </StatusBarItem>
             </StatusBar>
         

@@ -182,6 +182,12 @@ namespace ChameleonGame.ViewModel
             if (_model == null)
                 return;
 
+            if (BoardSize != board.Size)
+            { 
+                BoardSize = board.Size;
+                GenerateBoard();
+            }
+
             foreach (var cellVM in BoardCells) { 
                 Cell cell = board.Board[cellVM.Row, cellVM.Col];
                 cellVM.CellImageFilename = cell.Color.ToString();
@@ -200,13 +206,16 @@ namespace ChameleonGame.ViewModel
 
         private void CurrentPlayerChanged(object? sender, Player player)
         {
-            CurrentPlayer = player == Player.Red ? "Red" : "Green";
+            CurrentPlayer = $"Turn: {(player == Player.Red ? "Red" : "Green")}";
         }
 
         private void OnGameOver(object? sender, Player e)
         {
             _isGameOver = true;
             RefreshCommands();
+
+            CurrentPlayer = "Game is over!";
+
             string winnerString = e == Player.Red ? "Red" : "Green";
             GameOver?.Invoke(this, winnerString);
         }
